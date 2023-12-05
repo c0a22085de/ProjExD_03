@@ -157,12 +157,13 @@ def main():
 
     clock = pg.time.Clock()
     tmr = 0
+    tama = []
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:  # スペースキーが押されたら
-                beam = Beam(bird)  # ビームインスタンスの生成
+                tama.append(Beam(bird)) # ビームインスタンスの生成
         
         screen.blit(bg_img, [0, 0])
         
@@ -175,18 +176,23 @@ def main():
                 return
 
         for i, bomb in enumerate(bombs):
-            if beam is not None and beam.rct.colliderect(bomb.rct):
-                beam = None
-                bombs[i] = None
-                bird.change_img(6, screen)
+            for j, beam in enumerate(tama):
+                if beam is not None and beam.rct.colliderect(bomb.rct):
+                    tama[j] = None
+                    bombs[i] = None
+                    bird.change_img(6, screen)
         # Noneでない爆弾だけのリストを作る
         bombs = [bomb for bomb in bombs if bomb is not None]
+        tama = [beam for beam in tama if beam is not None]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         for bomb in bombs:
             bomb.update(screen)
-        if beam is not None:
+        for beam in tama:
+            yoko, tate = check_bound(beam.rct)
+            if yoko == False:
+                tama.remove(beam)
             beam.update(screen)
         pg.display.update()
         tmr += 1
